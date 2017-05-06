@@ -1,5 +1,10 @@
 package com.hpproject.admin.discountoffer;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -8,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -26,6 +32,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener{
@@ -38,6 +45,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabaseReference;
     private ChildEventListener mChildEventListener;
+    private Query query;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,17 +68,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference().child("offers");
 
-        // mDatabaseReference.push().setValue("hello");
+        OfferDetails temp = new OfferDetails("HDFC", "Flat 30% discount", "15-04-2017", "30-04-17", 13.080, 77.50, "Max");
+        mDatabaseReference.push().setValue(temp);
 
         mChildEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    OfferDetails offerDetails = dataSnapshot.getValue(OfferDetails.class);
+                OfferDetails offerDetails = dataSnapshot.getValue(OfferDetails.class);
+                handleNewLocation1(offerDetails.getLatitude(), offerDetails.getLongitude());
 
-                    Log.d("offers", String.valueOf(dataSnapshot));
-                    Log.d("offers", offerDetails.getOffer() + " " + offerDetails.location.getLongitude());
-                }
-
+                Log.d("offers", String.valueOf(dataSnapshot));
+                // Log.d("offers", offerDetails.getOffer() + " " + offerDetails.location.getLongitude());
+            }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
@@ -94,6 +103,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         };
 
         mDatabaseReference.addChildEventListener(mChildEventListener);
+        // mDatabaseReference.push().setValue(offerDetails);
     }
 
     @Override
@@ -110,6 +120,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             mGoogleApiClient.disconnect();
         }
+    }
+
+    private void sendNotification(String store, String offer, String bank) {
+        final NotificationManager notificationManager;
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        String longText = "";
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
+                .setContentTitle("New Offer at " +  store)
+                .setSmallIcon(R.drawable.notification)
+                .setContentText(bank + ": " + offer)
+                .setAutoCancel(true);
+                // .setStyle(new Notification.BigTextStyle().bigText(longText));
+
+
+        Intent notificationIntent = new Intent(this, MapsActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+
+
+        notificationManager.notify(0, builder.build());
     }
 
     private void setUpMapIfNeeded() {
@@ -145,17 +177,65 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        final Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location == null) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
         else {
-            handleNewLocation(location);
+            handleNewLocation1(location.getLatitude(), location.getLongitude());
+
+            query = mDatabaseReference.orderByChild("longitude").startAt(location.getLongitude() - 0.10).endAt(location.getLongitude() + 0.10);
+            query.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+                    OfferDetails offerDetails = dataSnapshot.getValue(OfferDetails.class);
+
+                    if (offerDetails.getLatitude() >= (location.getLatitude() - 0.10) && offerDetails.getLatitude() <= (location.getLatitude() + 0.10)) {
+                        // handleNewLocation1(latitide, longitude);
+
+                        Log.d("Query", String.valueOf(dataSnapshot));
+                        sendNotification(offerDetails.getStore(), offerDetails.getOffer(), offerDetails.getBank());
+                    }
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         };
     }
 
+    private void handleNewLocation1(double latitude, double longitude) {
+
+        LatLng latLng = new LatLng(latitude, longitude);
+        Log.d("latlng", String.valueOf(latLng));
+
+            MarkerOptions options = new MarkerOptions()
+                    .position(latLng)
+                    .title(latitude + " " + longitude);
+            mMap.addMarker(options);
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+    }
+
     private void handleNewLocation(Location location) {
-        Log.d(TAG, location.toString());
+        Log.d("Lat Lng", location.toString());
         for( int i = -10; i <= 90; i+=20) {
             double currentLatitude = i;
             double currentLongitude = i + 90;
