@@ -68,17 +68,22 @@ public class GoogleSignInActivity extends BaseActivity implements
         setContentView(R.layout.activity_google);
 
         // Views
+        /*
         mStatusTextView = (TextView) findViewById(R.id.status);
         mDetailTextView = (TextView) findViewById(R.id.detail);
 
         if (mStatusTextView.getText() != "Signed Out") {
 
         }
+        */
 
         // Button listeners
         findViewById(R.id.sign_in_button).setOnClickListener(this);
+
+        /*
         findViewById(R.id.sign_out_button).setOnClickListener(this);
         findViewById(R.id.disconnect_button).setOnClickListener(this);
+        */
 
         // [START config_signin]
         // Configure Google Sign In
@@ -110,7 +115,7 @@ public class GoogleSignInActivity extends BaseActivity implements
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
                 // [START_EXCLUDE]
-                updateUI(user);
+                // updateUI(user);
                 // [END_EXCLUDE]
             }
         };
@@ -150,11 +155,12 @@ public class GoogleSignInActivity extends BaseActivity implements
                 firebaseAuthWithGoogle(account);
 
                 Intent intent = new Intent(this, MapsActivity.class);
+                intent.putExtra("type", 1);
                 startActivity(intent);
             } else {
                 // Google Sign In failed, update UI appropriately
                 // [START_EXCLUDE]
-                updateUI(null);
+                //updateUI(null);
                 // [END_EXCLUDE]
             }
         }
@@ -207,7 +213,7 @@ public class GoogleSignInActivity extends BaseActivity implements
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(@NonNull Status status) {
-                        updateUI(null);
+                        //updateUI(null);
                     }
                 });
     }
@@ -221,26 +227,26 @@ public class GoogleSignInActivity extends BaseActivity implements
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(@NonNull Status status) {
-                        updateUI(null);
+                        //updateUI(null);
                     }
                 });
     }
 
     private void updateUI(FirebaseUser user) {
-        hideProgressDialog();
-        if (user != null) {
-            mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
-            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
-
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-        } else {
-            mStatusTextView.setText(R.string.signed_out);
-            mDetailTextView.setText(null);
-
-            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
-        }
+//        hideProgressDialog();
+//        if (user != null) {
+//            mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
+//            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
+//
+//            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+//            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+//        } else {
+//            mStatusTextView.setText(R.string.signed_out);
+//            mDetailTextView.setText(null);
+//
+//            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+//            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
+//        }
     }
 
     @Override
@@ -256,10 +262,11 @@ public class GoogleSignInActivity extends BaseActivity implements
         int i = v.getId();
         if (i == R.id.sign_in_button) {
             signIn();
-        } else if (i == R.id.sign_out_button) {
-            signOut();
-        } else if (i == R.id.disconnect_button) {
-            revokeAccess();
         }
+//        else if (i == R.id.sign_out_button) {
+//            signOut();
+//        } else if (i == R.id.disconnect_button) {
+//            revokeAccess();
+//        }
     }
 }

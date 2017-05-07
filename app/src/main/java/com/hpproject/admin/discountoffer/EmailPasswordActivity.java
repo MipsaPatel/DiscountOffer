@@ -56,16 +56,16 @@ public class EmailPasswordActivity extends BaseActivity implements
         setContentView(R.layout.activity_emailpassword);
 
         // Views
-        mStatusTextView = (TextView) findViewById(R.id.status);
-        mDetailTextView = (TextView) findViewById(R.id.detail);
+        //mStatusTextView = (TextView) findViewById(R.id.status);
+        // mDetailTextView = (TextView) findViewById(R.id.detail);
         mEmailField = (EditText) findViewById(R.id.field_email);
         mPasswordField = (EditText) findViewById(R.id.field_password);
 
         // Buttons
         findViewById(R.id.email_sign_in_button).setOnClickListener(this);
         findViewById(R.id.email_create_account_button).setOnClickListener(this);
-        findViewById(R.id.sign_out_button).setOnClickListener(this);
-        findViewById(R.id.verify_email_button).setOnClickListener(this);
+        // findViewById(R.id.sign_out_button).setOnClickListener(this);
+        // findViewById(R.id.verify_email_button).setOnClickListener(this);
 
         // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
@@ -84,7 +84,7 @@ public class EmailPasswordActivity extends BaseActivity implements
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
                 // [START_EXCLUDE]
-                updateUI(user);
+                // updateUI(user);
                 // [END_EXCLUDE]
             }
         };
@@ -134,6 +134,7 @@ public class EmailPasswordActivity extends BaseActivity implements
 
                         else {
                             Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+                            intent.putExtra("type", 2);
                             startActivity(intent);
                         }
 
@@ -171,7 +172,8 @@ public class EmailPasswordActivity extends BaseActivity implements
 
                         // [START_EXCLUDE]
                         if (!task.isSuccessful()) {
-                            mStatusTextView.setText(R.string.auth_failed);
+                            // mStatusTextView.setText(R.string.auth_failed);
+
                         }
 
                         else {
@@ -187,12 +189,12 @@ public class EmailPasswordActivity extends BaseActivity implements
 
     private void signOut() {
         mAuth.signOut();
-        updateUI(null);
+        // updateUI(null);
     }
 
     private void sendEmailVerification() {
         // Disable button
-        findViewById(R.id.verify_email_button).setEnabled(false);
+        // findViewById(R.id.verify_email_button).setEnabled(false);
 
         // Send verification email
         // [START send_email_verification]
@@ -203,7 +205,7 @@ public class EmailPasswordActivity extends BaseActivity implements
                     public void onComplete(@NonNull Task<Void> task) {
                         // [START_EXCLUDE]
                         // Re-enable button
-                        findViewById(R.id.verify_email_button).setEnabled(true);
+                        // findViewById(R.id.verify_email_button).setEnabled(true);
 
                         if (task.isSuccessful()) {
                             Toast.makeText(EmailPasswordActivity.this,
@@ -252,16 +254,16 @@ public class EmailPasswordActivity extends BaseActivity implements
 
             findViewById(R.id.email_password_buttons).setVisibility(View.GONE);
             findViewById(R.id.email_password_fields).setVisibility(View.GONE);
-            findViewById(R.id.signed_in_buttons).setVisibility(View.VISIBLE);
+            // findViewById(R.id.signed_in_buttons).setVisibility(View.VISIBLE);
 
-            findViewById(R.id.verify_email_button).setEnabled(!user.isEmailVerified());
+            // findViewById(R.id.verify_email_button).setEnabled(!user.isEmailVerified());
         } else {
             mStatusTextView.setText(R.string.signed_out);
             mDetailTextView.setText(null);
 
             findViewById(R.id.email_password_buttons).setVisibility(View.VISIBLE);
             findViewById(R.id.email_password_fields).setVisibility(View.VISIBLE);
-            findViewById(R.id.signed_in_buttons).setVisibility(View.GONE);
+            // findViewById(R.id.signed_in_buttons).setVisibility(View.GONE);
         }
     }
 
@@ -272,10 +274,15 @@ public class EmailPasswordActivity extends BaseActivity implements
             createAccount(mEmailField.getText().toString(), mPasswordField.getText().toString());
         } else if (i == R.id.email_sign_in_button) {
             signIn(mEmailField.getText().toString(), mPasswordField.getText().toString());
-        } else if (i == R.id.sign_out_button) {
+        }
+
+        /*
+        else if (i == R.id.sign_out_button) {
+
             signOut();
         } else if (i == R.id.verify_email_button) {
             sendEmailVerification();
         }
+        */
     }
 }

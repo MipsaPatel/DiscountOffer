@@ -1,13 +1,14 @@
 <resources>
     <string name="app_name">Discount Offer</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps"></string>
 
 
-    <string name="label_google_sign_in">Firebase + Google Sign In</string>
+    <string name="label_google_sign_in">Google Sign In</string>
     <string name="desc_google_sign_in">Use Google Sign In for authentication.</string>
 
     <string name="label_emailpassword">Email/Password Authentication</string>
     <string name="desc_emailpassword">Use an email and password for authentication.</string>
+    <string name="log_out">Log Out</string>
 
     <string name="label_anonymous_auth">Anonymous Authentication</string>
     <string name="desc_anonymous_auth">Sign in anonymously and then later upgrade to a full Firebase Auth user.</string>
@@ -29,7 +30,7 @@
     <string name="custom_token">Custom Token</string>
     <string name="signed_out">Signed Out</string>
     <string name="token_null">Token: null</string>
-    <string name="hint_email">Email</string>
+    <string name="hint_email">Email ID</string>
     <string name="hint_password">Password</string>
     <string name="desc_firebase_lockup">Firebase logo and name</string>
     <string name="auth_failed">Authentication failed</string>
