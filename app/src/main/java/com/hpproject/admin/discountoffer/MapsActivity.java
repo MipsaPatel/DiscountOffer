@@ -76,7 +76,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
-
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
         // .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
@@ -91,7 +91,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference().child("offers");
 
-        OfferDetails temp = new OfferDetails("HDFC", "Flat 30% discount", "15-04-2017", "30-04-17", 13.080, 77.50, "Max");
+        OfferDetails temp = new OfferDetails("HDFC", "Flat 30% discount", "15-04-2017", "30-04-17", 13.080, 77.50, "Marathahalli", "Max");
         // mDatabaseReference.push().setValue(temp);
 
         mChildEventListener = new ChildEventListener() {
@@ -142,6 +142,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 Intent previous = getIntent();
                 Bundle bundle = previous.getExtras();
+
+                Log.d("output", String.valueOf(bundle.getInt("type")));
 
                 if (bundle.getInt("type") == 1) {
                     mAuth.signOut();
@@ -274,7 +276,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 }
             });
-        };
+        }
     }
 
     private void handleNewLocation1(double latitude, double longitude) {

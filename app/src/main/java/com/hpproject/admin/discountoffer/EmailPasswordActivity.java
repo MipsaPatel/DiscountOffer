@@ -178,6 +178,7 @@ public class EmailPasswordActivity extends BaseActivity implements
 
                         else {
                             Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+                            intent.putExtra("type", 2);
                             startActivity(intent);
                         }
                         hideProgressDialog();
