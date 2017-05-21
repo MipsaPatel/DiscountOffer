@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -70,7 +69,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
-        // [END config_signin]
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -85,7 +83,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setInterval(10 * 1000)        // 10 seconds, in milliseconds
                 .setFastestInterval(1 * 1000);
 
-        // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -98,10 +95,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 OfferDetails offerDetails = dataSnapshot.getValue(OfferDetails.class);
-                handleNewLocation1(offerDetails.getLatitude(), offerDetails.getLongitude());
+                handleNewLocation1(offerDetails.getLatitude(), offerDetails.getLongitude(), offerDetails.getOffer(), offerDetails.getStore(), offerDetails.getArea());
 
                 Log.d("offers", String.valueOf(dataSnapshot));
-                // Log.d("offers", offerDetails.getOffer() + " " + offerDetails.location.getLongitude());
             }
 
             @Override
@@ -126,7 +122,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         };
 
         mDatabaseReference.addChildEventListener(mChildEventListener);
-        // mDatabaseReference.push().setValue(offerDetails);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -179,7 +174,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void sendNotification(String store, String offer, String bank) {
+    private void sendNotification(String store, String offer, String bank, String area) {
         final NotificationManager notificationManager;
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -187,9 +182,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
                 .setContentTitle("New Offer at " +  store)
                 .setSmallIcon(R.drawable.notification)
-                .setContentText(bank + ": " + offer)
+                .setContentText(bank + ": " + offer + ", " + area)
                 .setAutoCancel(true);
-                // .setStyle(new Notification.BigTextStyle().bigText(longText));
+                //.setStyle(new Notification.BigTextStyle().bigText(longText));
 
 
         Intent notificationIntent = new Intent(this, MapsActivity.class);
@@ -207,31 +202,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        // Add a marker in Sydney and move the camera
-        //LatLng sydney = new LatLng(-34,125);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+
             return;
         }
         final Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -239,7 +219,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
         else {
-            handleNewLocation1(location.getLatitude(), location.getLongitude());
+            handleNewLocation1(location.getLatitude(), location.getLongitude(), "", "", "");
 
             query = mDatabaseReference.orderByChild("longitude").startAt(location.getLongitude() - 0.10).endAt(location.getLongitude() + 0.10);
             query.addChildEventListener(new ChildEventListener() {
@@ -249,10 +229,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     OfferDetails offerDetails = dataSnapshot.getValue(OfferDetails.class);
 
                     if (offerDetails.getLatitude() >= (location.getLatitude() - 0.10) && offerDetails.getLatitude() <= (location.getLatitude() + 0.10)) {
-                        // handleNewLocation1(latitide, longitude);
 
                         Log.d("Query", String.valueOf(dataSnapshot));
-                        sendNotification(offerDetails.getStore(), offerDetails.getOffer(), offerDetails.getBank());
+                        sendNotification(offerDetails.getStore(), offerDetails.getOffer(), offerDetails.getBank(), offerDetails.getArea());
                     }
                 }
 
@@ -279,14 +258,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void handleNewLocation1(double latitude, double longitude) {
+    private void handleNewLocation1(double latitude, double longitude, String offer, String store, String area) {
 
         LatLng latLng = new LatLng(latitude, longitude);
         Log.d("latlng", String.valueOf(latLng));
 
             MarkerOptions options = new MarkerOptions()
                     .position(latLng)
-                    .title(latitude + " " + longitude);
+                    .title(offer + ", " + store + ", " + area);
+                    //latitude + "," + longitude + ", " +
             mMap.addMarker(options);
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
     }
@@ -327,8 +307,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onLocationChanged(Location location) {
-        handleNewLocation(location);
+        handleNewLocation1(location.getLatitude(), location.getLongitude(), "", "", "");
     }
-
-
 }

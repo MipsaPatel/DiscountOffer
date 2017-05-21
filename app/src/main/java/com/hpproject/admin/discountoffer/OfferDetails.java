@@ -18,9 +18,6 @@ public class OfferDetails {
     private double longitude;
     private String store;
     private String area;
-    // LocationDetails location;
-    // private LatLng location;
-
 
     public OfferDetails() {
     }
@@ -37,17 +34,6 @@ public class OfferDetails {
         // this.location = location;
     }
 
-    /*
-    public LatLng getLocation() {
-        return location;
-    }
-    */
-
-    /* public void setLocation(LatLng location) {
-        this.location = location;
-    }
-    */
-
     public String getArea() {
         return area;
     }
@@ -55,13 +41,6 @@ public class OfferDetails {
     public String getBank() {
         return bank;
     }
-
-    /*
-    public LocationDetails getLocation() {
-
-        return location;
-    }
-    */
 
     public String getOffer() {
         return offer;
@@ -90,12 +69,6 @@ public class OfferDetails {
     public void setBank(String bankName) {
         this.bank = bankName;
     }
-
-    /*
-    public void setLocation(LocationDetails location) {
-        this.location = location;
-    }
-    */
 
     public void setArea(String area) {
         this.area = area;
